@@ -1,0 +1,162 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { fetchAllRows } from '../../lib/supabase'
+
+export async function getStaticPaths() {
+  const data = await fetchAllRows('visa_requirements', '*')
+
+  if (!data || data.length === 0) {
+    return []
+  }
+
+  return data.map((row: any) => ({
+    params: { country: row.country_slug, visa: row.visa_slug },
+    props: { row }
+  }))
+}
+
+const { row } = Astro.props
+
+// JSON-LD structured data for SEO
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: `${row.visa_type} Requirements for ${row.country_name} Citizens`,
+  description: row.requirement_summary,
+  dateModified: row.last_updated,
+  author: {
+    '@type': 'Organization',
+    name: 'Visa Requirements Guide'
+  }
+}
+
+// FAQ Page JSON-LD structured data for Google Search rich snippets
+const faqJsonLd = row.faqs && row.faqs.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: row.faqs.map((faq: any) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer
+    }
+  }))
+} : null
+---
+
+<BaseLayout
+  title={`${row.country_name} Citizens: ${row.visa_type} Requirements`}
+  description={`${row.visa_type} requirements for ${row.country_name} citizens. Documents, fees, processing time, and official sources.`}
+  ogTitle={`${row.visa_type} for ${row.country_name} Citizens`}
+>
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  {faqJsonLd && <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />}
+
+  <header class="site-header">
+    <div class="hero-content">
+      <nav class="breadcrumb">
+        <a href="/">All Countries</a>
+        <span class="separator">›</span>
+        <a href={`/${row.country_slug}/`}>{row.country_name}</a>
+        <span class="separator">›</span>
+        <span>{row.visa_type}</span>
+      </nav>
+      <h1>{row.visa_type} Requirements<br/>for {row.country_name} Citizens</h1>
+      <p class="subtitle">{row.requirement_summary}</p>
+    </div>
+  </header>
+
+  <main class="site-main narrow">
+    {row.geo_summary && (
+      <section class="detail-section animate-in">
+        <h2>📌 Visa Overview</h2>
+        <div style="background: rgba(0, 0, 0, 0.03); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3b82f6; margin-bottom: 2rem;">
+          <p style="margin: 0; line-height: 1.6;">{row.geo_summary}</p>
+        </div>
+      </section>
+    )}
+
+    <!-- Required Documents -->
+    <section class="detail-section animate-in">
+      <h2>📋 Required Documents</h2>
+      <ul class="documents-list">
+        {row.required_documents.map((doc: string) => (
+          <li>
+            <span class="check-icon">✓</span>
+            <span>{doc}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Key Details -->
+    <section class="detail-section animate-in" style="animation-delay: 100ms;">
+      <h2>📊 Key Details</h2>
+      <table class="details-table">
+        <tbody>
+          <tr>
+            <th>Processing Time</th>
+            <td>{row.processing_time}</td>
+          </tr>
+          <tr>
+            <th>Application Fee</th>
+            <td>
+              <span class="fee-badge">
+                💰 ${row.fee_usd} USD
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th>Visa Validity</th>
+            <td>{row.validity}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Notes -->
+    {row.notes && (
+      <section class="detail-section animate-in" style="animation-delay: 200ms;">
+        <h2>ℹ️ Important Notes</h2>
+        <div class="note-callout">
+          <strong>Note:</strong> {row.notes}
+        </div>
+      </section>
+    )}
+
+    <!-- FAQs Section -->
+    {row.faqs && row.faqs.length > 0 && (
+      <section class="detail-section animate-in" style="animation-delay: 250ms;">
+        <h2>❓ Frequently Asked Questions</h2>
+        <div class="faq-accordion">
+          {row.faqs.map((faq: any, idx: number) => (
+            <details class="faq-item" open={idx === 0}>
+              <summary class="faq-question">
+                <span>{faq.question}</span>
+                <span class="faq-toggle"></span>
+              </summary>
+              <div class="faq-answer">
+                <p>{faq.answer}</p>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Source & Metadata -->
+    <section class="detail-section animate-in" style="animation-delay: 300ms;">
+      <div class="source-info">
+        <span>Source: <a href={row.source_url} rel="nofollow noreferrer">{row.source_url}</a></span>
+        <span>Last updated: {row.last_updated}</span>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <div style="margin-top: var(--space-xl);">
+      <a href={`/${row.country_slug}/`} class="back-link">← Back to {row.country_name}</a>
+    </div>
+  </main>
+</BaseLayout>

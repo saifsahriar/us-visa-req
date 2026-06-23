@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { fetchAllRows } from '../lib/supabase'
+
+const visaIcons: Record<string, string> = {
+  'b1-b2-tourist-visa': '✈️',
+  'f1-student-visa': '🎓',
+  'h1b-work-visa': '💼',
+  'j1-exchange-visitor-visa': '🤝',
+  'l1-intracompany-transfer-visa': '🏢',
+  'o1-extraordinary-ability-visa': '⭐',
+}
+
+const visaDescriptions: Record<string, string> = {
+  'b1-b2-tourist-visa': 'Business & tourism travel to the US',
+  'f1-student-visa': 'Study at US academic institutions',
+  'h1b-work-visa': 'Specialty occupation employment',
+  'j1-exchange-visitor-visa': 'Cultural exchange & training programs',
+  'l1-intracompany-transfer-visa': 'Transfer within multinational companies',
+  'o1-extraordinary-ability-visa': 'Individuals with extraordinary talent',
+}
+
+export async function getStaticPaths() {
+  const data = await fetchAllRows('visa_requirements', 'country_name, country_slug, visa_type, visa_slug')
+
+  if (!data || data.length === 0) {
+    return []
+  }
+
+  const countries = [...new Map(data.map((r: any) => [r.country_slug, r])).values()]
+  return countries.map((c: any) => ({
+    params: { country: c.country_slug },
+    props: {
+      countryName: c.country_name,
+      visas: data.filter((r: any) => r.country_slug === c.country_slug)
+    }
+  }))
+}
+
+const { countryName, visas } = Astro.props
+---
+
+<BaseLayout
+  title={`US Visa Requirements for ${countryName} Citizens`}
+  description={`Complete US visa requirements for ${countryName} citizens. B1/B2 Tourist, F1 Student, H1B Work, and more visa types covered.`}
+>
+  <header class="site-header">
+    <div class="hero-content">
+      <nav class="breadcrumb">
+        <a href="/">All Countries</a>
+        <span class="separator">›</span>
+        <span>{countryName}</span>
+      </nav>
+      <h1>US Visa Requirements for<br/>{countryName} Citizens</h1>
+      <p class="subtitle">
+        {visas.length} visa types available. Select one to view full requirements, documents, and fees.
+      </p>
+    </div>
+  </header>
+
+  <main class="site-main narrow">
+    <ul class="visa-list">
+      {visas.map((v: any) => (
+        <li class="visa-card">
+          <a href={`/${v.country_slug}/${v.visa_slug}/`}>
+            <span class="visa-icon">{visaIcons[v.visa_slug] || '📄'}</span>
+            <span class="visa-info">
+              <span class="visa-name">{v.visa_type}</span>
+              <span class="visa-desc">{visaDescriptions[v.visa_slug] || ''}</span>
+            </span>
+            <span class="chevron">›</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <div style="margin-top: var(--space-2xl);">
+      <a href="/" class="back-link">← Back to all countries</a>
+    </div>
+  </main>
+</BaseLayout>

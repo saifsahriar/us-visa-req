@@ -1,17 +1,92 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getSupabaseClient, fetchAllRows } from '../lib/supabase'
 
+const supabase = getSupabaseClient()
+
+const countries = await fetchAllRows('visa_requirements', 'country_name, country_slug')
+countries.sort((a, b) => a.country_name.localeCompare(b.country_name))
+
+const unique = [...new Map(countries?.map((c: any) => [c.country_slug, c]) || []).values()]
+
+// Count total visa types
+const { count: totalPages } = await supabase
+  .from('visa_requirements')
+  .select('*', { count: 'exact', head: true })
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title="US Visa Requirements by Country | Complete Guide"
+  description="Complete US visa requirements for every country. Find required documents, fees, processing times, and official sources for B1/B2, F1, H1B, and more."
+>
+  <header class="site-header">
+    <div class="hero-content">
+      <h1>🇺🇸 US Visa Requirements<br/>by Country</h1>
+      <p class="subtitle">
+        Your complete guide to US visa requirements. Select your country to see documents, fees, processing times, and more.
+      </p>
+      <div class="stats-bar" style="margin-top: var(--space-lg);">
+        <div class="stat-item">
+          <span class="stat-value">{unique.length}</span>
+          <span class="stat-label">Countries</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">6</span>
+          <span class="stat-label">Visa Types</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">{totalPages || '—'}</span>
+          <span class="stat-label">Guides</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="site-main">
+    {unique.length === 0 ? (
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>No visa data available yet. Run the scraper to populate the database.</p>
+      </div>
+    ) : (
+      <>
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="search-input"
+            id="country-search"
+            placeholder="Search countries..."
+            autocomplete="off"
+          />
+        </div>
+
+        <ul class="country-grid" id="country-list">
+          {unique.map((c: any) => (
+            <li class="country-card" data-country={c.country_name.toLowerCase()}>
+              <a href={`/${c.country_slug}/`}>
+                {c.country_name}
+                <span class="arrow">→</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+  </main>
+
+  <script>
+    const search = document.getElementById('country-search') as HTMLInputElement
+    const cards = document.querySelectorAll('.country-card') as NodeListOf<HTMLElement>
+
+    if (search) {
+      search.addEventListener('input', () => {
+        const q = search.value.toLowerCase().trim()
+        cards.forEach(card => {
+          const name = card.dataset.country || ''
+          card.style.display = name.includes(q) ? '' : 'none'
+        })
+      })
+    }
+  </script>
+</BaseLayout>
