@@ -1,43 +1,23 @@
-# Astro Starter Kit: Minimal
+# US Visa Requirements Portal (pSEO)
 
-```sh
-npm create astro@latest -- --template minimal
-```
+A high-performance Programmatic SEO (pSEO) website designed to serve detailed US visa requirements (B1/B2, F1, H1B, J1, L1, O1) for citizens of all countries. The project features dynamic SEO optimization, structured data schemas, and automated AI-driven FAQ pipelines.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+---
 
-## 🚀 Project Structure
+## 🛠️ Architecture & Tech Stack
 
-Inside of your Astro project, you'll see the following folders and files:
+- **Frontend**: [Astro](https://astro.build/) (Static Site Generation) custom-styled with Vanilla CSS.
+- **Database**: [Supabase](https://supabase.com/) (PostgreSQL) storing visa records and generated FAQs.
+- **Hosting**: [Vercel](https://vercel.com/) (Serverless Static Deployments).
+- **Scraper**: Python (`BeautifulSoup4` & `requests`) for crawling travel.state.gov.
+- **FAQ Generator**: Python + Llama 3.3 70B (NVIDIA NIM) + Google Autocomplete API for search intent harvesting and fact-checked FAQ generation.
+- **Automation**: GitHub Actions scheduling monthly updates and triggering Vercel build/redeploy hooks.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+---
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 📡 Programmatic Data & FAQ Pipeline
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+1. **Scraping**: `scrape_and_push.py` and `robust_api_scraper.py` populate Supabase with structured records of required documents, fees, processing times, and official links.
+2. **Keyword Harvesting**: `generate_faqs.py` queries Google's autocomplete API for real-world search queries matching `[US visa type] requirements for [country] citizens`.
+3. **LLM Generation**: Llama 3.3 70B synthesizes these search queries and official visa details into natural, SEO-rich FAQs.
+4. **Frontend Delivery**: Astro maps every country/visa combination dynamically, serving interactive accordion questions and injecting structured `FAQPage` JSON-LD schemas.
