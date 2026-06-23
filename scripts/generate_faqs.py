@@ -195,6 +195,7 @@ Expected JSON output format:
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,  # Zero creativity, stick to the facts
             max_tokens=800,
+            timeout=30.0,
         )
         
         content = response.choices[0].message.content.strip()
