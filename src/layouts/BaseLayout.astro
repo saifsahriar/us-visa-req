@@ -8,7 +8,10 @@ interface Props {
 }
 
 const { title, description, ogTitle } = Astro.props
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://yourdomain.com')
+
+// Ensure trailing slashes are removed from the canonical URL to match Google Ads expectations
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/'
+const canonicalURL = new URL(pathname, Astro.site || 'https://usvisarequirements.com')
 ---
 
 <!doctype html>
