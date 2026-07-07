@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout
+  title="Page Not Found | US Visa Requirements"
+  description="The page you are looking for does not exist."
+>
+  <header class="site-header">
+    <div class="hero-content">
+      <h1>404</h1>
+      <p class="subtitle">
+        Page Not Found
+      </p>
+    </div>
+  </header>
+
+  <main class="site-main" style="text-align: center; padding: 4rem 1rem;">
+    <div class="empty-state">
+      <div class="icon">🔍</div>
+      <h2 style="margin-bottom: 1rem;">Oops! We couldn't find that page.</h2>
+      <p style="margin-bottom: 2rem;">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+      <a href="/" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--primary, #0f172a); color: white; text-decoration: none; border-radius: 8px; font-weight: 500; transition: opacity 0.2s;">
+        Return to Homepage
+      </a>
+    </div>
+  </main>
+</BaseLayout>
