@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "us-visa-req.vercel.app"
+        }
+      ],
+      "destination": "https://usvisarequirements.com/$1",
+      "permanent": true
+    }
+  ]
+}
