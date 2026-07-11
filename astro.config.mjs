@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap'
 // https://astro.build/config
 export default defineConfig({
   site: 'https://usvisarequirements.com',
-  trailingSlash: 'never',
+  trailingSlash: 'always',
   output: 'static',
   adapter: vercel(),
   integrations: [sitemap()],
